@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text;
+using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
 namespace D365Exporter;
@@ -22,6 +23,11 @@ public class TraceCriteria
 
     [XmlAttribute(AttributeName = "inventBatchId")]
     public string InventBatchId { get; set; }
+
+    public string DisplayText
+    {
+        get => $"{ItemId} - {InventBatchId}";
+    }
 }
 
 [XmlRoot(ElementName = "CurrentOnHand")]
@@ -41,6 +47,11 @@ public class ItemNode
 
     [XmlElement(ElementName = "ItemNode")]
     public List<ItemNode> ChildItemNode { get; set; }
+
+    public bool HasChildren
+    {
+        get => ChildItemNode != null && ChildItemNode.Any();
+    }
 
     [XmlAttribute(AttributeName = "Item")]
     public string Item { get; set; }
@@ -82,13 +93,33 @@ public class ItemNode
     public string InventBatchId { get; set; }
 
     [XmlAttribute(AttributeName = "AlreadyIncluded")]
-    public int AlreadyIncluded { get; set; }
+    public string AlreadyIncluded { get; set; }
 
     [XmlAttribute(AttributeName = "PickedOnly")]
     public int PickedOnly { get; set; }
 
     [XmlAttribute(AttributeName = "InventColorId")]
-    public int InventColorId { get; set; }
+    public string InventColorId { get; set; }
+
+    public string DisplayLabel
+    {
+        get
+        {
+            var sb = new StringBuilder($"{Item} * {Category} {Reference} * {Date.ToString("g")} * {Math.Round(Qty, 0)}{UnitId}");
+            if (!string.IsNullOrWhiteSpace(InventColorId))
+                sb.Append($"Color={InventColorId}");
+            if (!string.IsNullOrWhiteSpace(InventStyleId))
+                sb.Append($" * Style={InventStyleId}");
+            if (!string.IsNullOrWhiteSpace(InventSizeId))
+                sb.Append($" * Size={InventSizeId}");
+            if (!string.IsNullOrWhiteSpace(InventSiteId))
+                sb.Append($" * Site={InventSiteId}");
+            sb.Append($" * Warehouse={InventLocationId},Location={WMSLocationId},Inventory Status={InventStatusId},Batch Number={InventBatchId}");
+
+
+            return sb.ToString();
+        }
+    }
 }
 
 [XmlRoot(ElementName = "TraceHierarchy")]

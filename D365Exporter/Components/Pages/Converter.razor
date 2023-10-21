@@ -1,5 +1,6 @@
 ﻿@page "/Converter"
 @using BlazorStrap
+@using BlazorStrap.Extensions.TreeView
 @using System.Xml
 @using Newtonsoft.Json
 @using System.Xml.Serialization
@@ -21,12 +22,46 @@
 } else
 {
     <BSContainer Container="Container.Fluid">
-        <BSRow>
-            <InputTextArea @bind-Value="@inputText" />
+        <BSRow Align="Align.Center">
+            <BSCol>
+                <BSLabel>@convertedTrace.TraceCriteria.DisplayText</BSLabel>
+                <BSTree IsExpanded="true">
+                    <BSTreeNode>
+                        @foreach (var trace in convertedTrace.TraceHierarchy.ItemNode)
+                        {
+                            <BSTreeItem IsAlwaysActive="true" IsDefaultActive"true" TextLabel="@trace.DisplayLabel">
+                                <ChildContent>
+                                    @if (trace.HasChildren)
+                                    {
+                                        @foreach(var t1 in trace.ChildItemNode){
+                                        <BSTreeNode>
+                                            <BSTreeItem TextLabel="@t1.DisplayLabel">
+                                                <ChildContent>
+                                                        @if (t1.HasChildren)
+                                                        {
+                                                            @foreach(var t2 in trace.ChildItemNode)
+                                                            {
+                                                             <BSTreeNode>
+                                                                 <BSTreeItem TextLabel="@t2.DisplayLabel">
+
+                                                                 </BSTreeItem>
+                                                             </BSTreeNode>
+                                                               
+                                                            }
+                                                        }
+                                                    </ChildContent>
+                                            </BSTreeItem>
+                                        </BSTreeNode>
+                                        }
+                                    }
+                                </ChildContent>
+                            </BSTreeItem>
+                        }
+                    </BSTreeNode>
+                </BSTree>
+            </BSCol>
         </BSRow>
-        <BSRow>
-            <BSButton OnClick="ConvertToJsonAndDisplay" Color="BSColor.Primary">Process</BSButton>
-        </BSRow>
+       
     </BSContainer>
 }
 
@@ -106,26 +141,11 @@
                 {
                     convertedTrace = (Trace)serializer.Deserialize(stream);
                 }
-                
+
                 if (convertedTrace != null)
                 {
-                    _blazorStrap.Toaster.Add("Success", convertedTrace.ToString(), o =>
-                    {
-                        o.Color = BSColor.Success;
-                        o.Toast = Toast.MiddleCenter;
-                    });
-                    return;
+                    showTextEntry = false;
                 }
-
-                // var xmlData = fileContent.rea  
-                // await fileContent.ReadAsStream().CopyToAsync(ms);
-                // using (XmlReader xmlReader = XmlReader.Create(ms))
-                // {
-
-                //     convertedTrace = (Trace)serializer.Deserialize(xmlReader);
-                // }
-                // var y = convertedTrace;
-                //doc.LoadXml()
             }
         }
     }
