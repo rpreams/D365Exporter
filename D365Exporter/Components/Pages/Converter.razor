@@ -3,6 +3,7 @@
 @using System.Xml
 @using Newtonsoft.Json
 @using System.Xml.Serialization
+@using System.Text
 @inject IBlazorStrap _blazorStrap
 
 <PageTitle>D365 Converter</PageTitle>
@@ -83,18 +84,47 @@
             {
                 //load file
                 XmlSerializer serializer = new XmlSerializer(typeof(Trace));
-                XmlDocument doc = new XmlDocument();
-                //read file contents
-                MemoryStream ms = new MemoryStream();
-                var fileContent = new StreamContent(file.OpenReadStream());
-                var xmlData = fileContent.rea  
-                await fileContent.ReadAsStream().CopyToAsync(ms);
-                using (XmlReader xmlReader = XmlReader.Create(ms))
-                {
 
-                    convertedTrace = (Trace)serializer.Deserialize(xmlReader);
+                var xmlFromFile = string.Empty;
+                using(var fileContent = new StreamContent(file.OpenReadStream()))
+                {
+                    xmlFromFile = await fileContent.ReadAsStringAsync();
                 }
-                var y = convertedTrace;
+
+                if (string.IsNullOrWhiteSpace(xmlFromFile))
+                {
+                    _blazorStrap.Toaster.Add("File didn't read", o =>
+                    {
+                        o.Color = BSColor.Warning;
+                        o.CloseAfter = 2000;
+                        o.Toast = Toast.MiddleCenter;
+                    });
+                    return;
+                }
+
+                using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(xmlFromFile)))
+                {
+                    convertedTrace = (Trace)serializer.Deserialize(stream);
+                }
+                
+                if (convertedTrace != null)
+                {
+                    _blazorStrap.Toaster.Add("Success", convertedTrace.ToString(), o =>
+                    {
+                        o.Color = BSColor.Success;
+                        o.Toast = Toast.MiddleCenter;
+                    });
+                    return;
+                }
+
+                // var xmlData = fileContent.rea  
+                // await fileContent.ReadAsStream().CopyToAsync(ms);
+                // using (XmlReader xmlReader = XmlReader.Create(ms))
+                // {
+
+                //     convertedTrace = (Trace)serializer.Deserialize(xmlReader);
+                // }
+                // var y = convertedTrace;
                 //doc.LoadXml()
             }
         }

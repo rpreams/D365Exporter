@@ -21,7 +21,7 @@ public class TraceCriteria
     public string ItemId { get; set; }
 
     [XmlAttribute(AttributeName = "inventBatchId")]
-    public int InventBatchId { get; set; }
+    public string InventBatchId { get; set; }
 }
 
 [XmlRoot(ElementName = "CurrentOnHand")]
@@ -79,7 +79,7 @@ public class ItemNode
     public string InventStatusId { get; set; }
 
     [XmlAttribute(AttributeName = "inventBatchId")]
-    public int InventBatchId { get; set; }
+    public string InventBatchId { get; set; }
 
     [XmlAttribute(AttributeName = "AlreadyIncluded")]
     public int AlreadyIncluded { get; set; }
