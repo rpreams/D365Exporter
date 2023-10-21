@@ -1,0 +1,102 @@
+﻿@page "/Converter"
+@using BlazorStrap
+@using System.Xml
+@using Newtonsoft.Json
+@using System.Xml.Serialization
+@inject IBlazorStrap _blazorStrap
+
+<PageTitle>D365 Converter</PageTitle>
+
+
+<BSToaster Position="ToastPosition" ZIndex="99999" />
+@if (showTextEntry){
+    <BSContainer Container="Container.Fluid">
+        @* <InputTextArea @bind-Value="@inputText" /> *@
+        <BSLabel>Select a file: </BSLabel>
+        <InputFile id="flpicker" OnChange="OnInputFileChange"></InputFile>
+        <BSRow>
+        </BSRow>
+    </BSContainer>
+} else
+{
+    <BSContainer Container="Container.Fluid">
+        <BSRow>
+            <InputTextArea @bind-Value="@inputText" />
+        </BSRow>
+        <BSRow>
+            <BSButton OnClick="ConvertToJsonAndDisplay" Color="BSColor.Primary">Process</BSButton>
+        </BSRow>
+    </BSContainer>
+}
+
+
+@code {
+
+
+    private bool showTextEntry { get; set; } = true;
+    private bool HasIcon { get; set; }
+    private Toast ToastPlacement { get; set; }
+    private int ZIndex { get; set; } = 1025;
+    private Position ToastPosition { get; set; } = Position.Fixed;
+    private BSColor Color { get; set; }
+    private int Time { get; set; } = 0;
+    private int i = 0;
+
+
+
+    private string inputText { get; set; }
+    private Trace convertedTrace { get; set; }
+
+    private async Task ConvertToJsonAndDisplay()
+    {
+        if (string.IsNullOrWhiteSpace(inputText))
+        {
+            _blazorStrap.Toaster.Add("No text present", o =>
+            {
+                o.Color = BSColor.Warning;
+                o.CloseAfter = 2000;
+                o.Toast = Toast.MiddleCenter;
+            });
+        }
+        XmlSerializer serializer = new XmlSerializer(typeof(TraceHierarchy));
+        XmlDocument doc = new XmlDocument();
+        doc.LoadXml(inputText);
+
+    } 
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        long maxFileSize = 1024 * 60;
+
+        foreach (var file in e.GetMultipleFiles(1))
+        {
+            if (file.ContentType != "text/xml")
+            {
+                _blazorStrap.Toaster.Add("Invalid File Type", o =>
+                {
+                    o.Color = BSColor.Warning;
+                    o.CloseAfter = 2000;
+                    o.Toast = Toast.MiddleCenter;
+                });
+                return;
+            } else
+            {
+                //load file
+                XmlSerializer serializer = new XmlSerializer(typeof(Trace));
+                XmlDocument doc = new XmlDocument();
+                //read file contents
+                MemoryStream ms = new MemoryStream();
+                var fileContent = new StreamContent(file.OpenReadStream());
+                var xmlData = fileContent.rea  
+                await fileContent.ReadAsStream().CopyToAsync(ms);
+                using (XmlReader xmlReader = XmlReader.Create(ms))
+                {
+
+                    convertedTrace = (Trace)serializer.Deserialize(xmlReader);
+                }
+                var y = convertedTrace;
+                //doc.LoadXml()
+            }
+        }
+    }
+}

@@ -1,0 +1,34 @@
+﻿@page "/Converter"
+
+<PageTitle>D365 Converter</PageTitle>
+
+<div class="container">
+    <div class"row">
+        <div class="col-md-5 col-sm-12">
+            <InputTextArea data-bind="@inputText">
+
+            </InputTextArea>
+        </div>
+    </div>
+    <div class"row">
+        <div class="col-md-3">
+            <button class="btn btn-primary" @onclick="ConvertToJsonAndDisplay">Click me</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+@code {
+    private string inputText;
+    private TraceHierarchy convertedTrace;
+
+    private async Task ConvertToJsonAndDisplay()
+    {
+        if (string.IsNullOrWhiteSpace(inputText))
+        {
+
+        }
+    }
+}
