@@ -105,7 +105,7 @@ public class ItemNode
     {
         get
         {
-            var sb = new StringBuilder($"{Item} * {Category} {Reference} * {Date.ToString("g")} * {Math.Round(Qty, 0)}{UnitId}");
+            var sb = new StringBuilder($"{Item} * {Category} {Reference} * {Date.ToString("d")} * {Math.Round(Qty, 0)}{UnitId}");
             if (!string.IsNullOrWhiteSpace(InventColorId))
                 sb.Append($"Color={InventColorId}");
             if (!string.IsNullOrWhiteSpace(InventStyleId))

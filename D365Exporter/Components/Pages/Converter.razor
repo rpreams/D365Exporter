@@ -1,104 +1,34 @@
-﻿@page "/Converter"
-@using BlazorStrap
-@using BlazorStrap.Extensions.TreeView
+﻿@page "/"
+@inject IJSRuntime JsRuntime
 @using System.Xml
 @using Newtonsoft.Json
 @using System.Xml.Serialization
 @using System.Text
-@inject IBlazorStrap _blazorStrap
 
 <PageTitle>D365 Converter</PageTitle>
-
-
-<BSToaster Position="ToastPosition" ZIndex="99999" />
-@if (showTextEntry){
-    <BSContainer Container="Container.Fluid">
-        @* <InputTextArea @bind-Value="@inputText" /> *@
-        <BSLabel>Select a file: </BSLabel>
+<Div Class="container-fluid">
+    @if (showTextEntry)
+    {
+        <Label>Select a File:</Label>
         <InputFile id="flpicker" OnChange="OnInputFileChange"></InputFile>
-        <BSRow>
-        </BSRow>
-    </BSContainer>
-} else
-{
-    <BSContainer Container="Container.Fluid">
-        <BSRow Align="Align.Center">
-            <BSCol>
-                <BSLabel>@convertedTrace.TraceCriteria.DisplayText</BSLabel>
-                <BSTree IsExpanded="true">
-                    <BSTreeNode>
-                        @foreach (var trace in convertedTrace.TraceHierarchy.ItemNode)
-                        {
-                            <BSTreeItem IsAlwaysActive="true" IsDefaultActive"true" TextLabel="@trace.DisplayLabel">
-                                <ChildContent>
-                                    @if (trace.HasChildren)
-                                    {
-                                        @foreach(var t1 in trace.ChildItemNode){
-                                        <BSTreeNode>
-                                            <BSTreeItem TextLabel="@t1.DisplayLabel">
-                                                <ChildContent>
-                                                        @if (t1.HasChildren)
-                                                        {
-                                                            @foreach(var t2 in trace.ChildItemNode)
-                                                            {
-                                                             <BSTreeNode>
-                                                                 <BSTreeItem TextLabel="@t2.DisplayLabel">
-
-                                                                 </BSTreeItem>
-                                                             </BSTreeNode>
-                                                               
-                                                            }
-                                                        }
-                                                    </ChildContent>
-                                            </BSTreeItem>
-                                        </BSTreeNode>
-                                        }
-                                    }
-                                </ChildContent>
-                            </BSTreeItem>
-                        }
-                    </BSTreeNode>
-                </BSTree>
-            </BSCol>
-        </BSRow>
-       
-    </BSContainer>
-}
+    }
+    else
+    {
+        <Label>@convertedTrace.TraceCriteria.DisplayText</Label>
+        <TreeView Nodes="convertedTrace.TraceHierarchy.ItemNode"
+            GetChildNodes="@(item => item.ChildItemNode)"
+            HasChildNodes="@(item => item.HasChildren == true)">
+            <NodeContent>@context.DisplayLabel</NodeContent>
+        </TreeView>
+    }
+</Div>
 
 
-@code {
-
-
+    @code {
     private bool showTextEntry { get; set; } = true;
-    private bool HasIcon { get; set; }
-    private Toast ToastPlacement { get; set; }
-    private int ZIndex { get; set; } = 1025;
-    private Position ToastPosition { get; set; } = Position.Fixed;
-    private BSColor Color { get; set; }
-    private int Time { get; set; } = 0;
-    private int i = 0;
-
-
 
     private string inputText { get; set; }
     private Trace convertedTrace { get; set; }
-
-    private async Task ConvertToJsonAndDisplay()
-    {
-        if (string.IsNullOrWhiteSpace(inputText))
-        {
-            _blazorStrap.Toaster.Add("No text present", o =>
-            {
-                o.Color = BSColor.Warning;
-                o.CloseAfter = 2000;
-                o.Toast = Toast.MiddleCenter;
-            });
-        }
-        XmlSerializer serializer = new XmlSerializer(typeof(TraceHierarchy));
-        XmlDocument doc = new XmlDocument();
-        doc.LoadXml(inputText);
-
-    } 
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
@@ -108,13 +38,9 @@
         {
             if (file.ContentType != "text/xml")
             {
-                _blazorStrap.Toaster.Add("Invalid File Type", o =>
-                {
-                    o.Color = BSColor.Warning;
-                    o.CloseAfter = 2000;
-                    o.Toast = Toast.MiddleCenter;
-                });
-                return;
+                var message = "Invalid File Type";
+                await JsRuntime.InvokeVoidAsync("alert", message);
+
             } else
             {
                 //load file
@@ -128,12 +54,7 @@
 
                 if (string.IsNullOrWhiteSpace(xmlFromFile))
                 {
-                    _blazorStrap.Toaster.Add("File didn't read", o =>
-                    {
-                        o.Color = BSColor.Warning;
-                        o.CloseAfter = 2000;
-                        o.Toast = Toast.MiddleCenter;
-                    });
+                    await JsRuntime.InvokeVoidAsync("alert", "File read error");
                     return;
                 }
 
