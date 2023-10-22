@@ -16,12 +16,24 @@
     {
         <Row>
             <Column ColumnSize="ColumnSize.Is11">
-                <Label>@convertedTrace.TraceCriteria.DisplayText</Label>
-                <TreeView Nodes="convertedTrace.TraceHierarchy.ItemNode"
-                    GetChildNodes="@(item => item.ChildItemNode)"
-                    HasChildNodes="@(item => item.HasChildren == true)">
-                    <NodeContent>@context.DisplayLabel</NodeContent>
-                </TreeView>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <Button Color="Color.Success" Clicked="@(async()=> await treeViewRef.ExpandAll())">Expand All</Button>
+                    <Button Color="Color.Danger" Clicked="@(async ()=> await treeViewRef.CollapseAll())">Collapse All</Button>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <Label>@convertedTrace.TraceCriteria.DisplayText</Label>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <TreeView Margin="Margin.Is1" @ref="@treeViewRef" Nodes="convertedTrace.TraceHierarchy.ItemNode"
+                        GetChildNodes="@(item => item.ChildItemNode)"
+                        HasChildNodes="@(item => item.HasChildren == true)">
+                        <NodeContent>
+                            <Badge TextColor="TextColor.Light" Color="Color.Info" Pill="true">
+                                    <Label Margin="Margin.Is1" TextSize="TextSize.Medium">@context.DisplayLabel</Label>
+                            </Badge>
+                        </NodeContent>
+                    </TreeView>
+                </Column>
             </Column>
             <Column ColumnSize="ColumnSize.Is1">
                 <Button Color="Color.Primary" Clicked="ResetAsync">Reset</Button>
@@ -32,6 +44,7 @@
 
 
 @code {
+    TreeView<ItemNode> treeViewRef;
     private bool showTextEntry { get; set; } = true;
     private string inputText { get; set; }
     private Trace convertedTrace { get; set; }
