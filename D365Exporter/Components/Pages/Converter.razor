@@ -14,21 +14,33 @@
     }
     else
     {
-        <Label>@convertedTrace.TraceCriteria.DisplayText</Label>
-        <TreeView Nodes="convertedTrace.TraceHierarchy.ItemNode"
-            GetChildNodes="@(item => item.ChildItemNode)"
-            HasChildNodes="@(item => item.HasChildren == true)">
-            <NodeContent>@context.DisplayLabel</NodeContent>
-        </TreeView>
+        <Row>
+            <Column ColumnSize="ColumnSize.Is11">
+                <Label>@convertedTrace.TraceCriteria.DisplayText</Label>
+                <TreeView Nodes="convertedTrace.TraceHierarchy.ItemNode"
+                    GetChildNodes="@(item => item.ChildItemNode)"
+                    HasChildNodes="@(item => item.HasChildren == true)">
+                    <NodeContent>@context.DisplayLabel</NodeContent>
+                </TreeView>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is1">
+                <Button Color="Color.Primary" Clicked="ResetAsync">Reset</Button>
+            </Column>
+        </Row>
     }
 </Div>
 
 
-    @code {
+@code {
     private bool showTextEntry { get; set; } = true;
-
     private string inputText { get; set; }
     private Trace convertedTrace { get; set; }
+
+    private async void ResetAsync()
+    {
+        convertedTrace = null;
+        showTextEntry = true;
+    }
 
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
@@ -69,5 +81,6 @@
                 }
             }
         }
+
     }
 }
